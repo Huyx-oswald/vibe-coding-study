@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vibe Coding 术语知识库 · 黑话翻译器</title>
+<style>
+  :root{
+    --bg:#f6f7f9;
+    --bg-elev:#ffffff;
+    --bg-soft:#eef1f4;
+    --text:#1f2329;
+    --text-soft:#5b6470;
+    --text-dim:#8a93a0;
+    --border:#e2e6ea;
+    --accent:#4f46e5;
+    --accent-soft:#eef0ff;
+    --code-bg:#f1f3f5;
+    --warn:#b45309;
+    --warn-bg:#fff7ed;
+    --ok:#15803d;
+    --ok-bg:#f0fdf4;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06);
+    --radius:12px;
+  }
+  [data-theme="dark"]{
+    --bg:#0f1115;
+    --bg-elev:#171a21;
+    --bg-soft:#1d2129;
+    --text:#e7e9ee;
+    --text-soft:#a7adba;
+    --text-dim:#6b7280;
+    --border:#2a2f38;
+    --accent:#8b87ff;
+    --accent-soft:#22203a44;
+    --code-bg:#1d2129;
+    --warn:#fbbf24;
+    --warn-bg:#2a2114;
+    --ok:#4ade80;
+    --ok-bg:#10231a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* header */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:var(--bg-elev);
+    border-bottom:1px solid var(--border);
+    backdrop-filter:saturate(180%) blur(8px);
+  }
+  .header-inner{
+    max-width:1400px;margin:0 auto;padding:10px 20px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;white-space:nowrap}
+  .brand .dot{width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#4f46e5,#7c3aed)}
+  .brand small{font-weight:400;color:var(--text-dim);font-size:12px;margin-left:4px}
+  nav.tabs{display:flex;gap:4px;flex-wrap:wrap}
+  nav.tabs button{
+    border:1px solid transparent;background:transparent;color:var(--text-soft);
+    padding:7px 14px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:500;
+    transition:all .15s;
+  }
+  nav.tabs button:hover{background:var(--bg-soft);color:var(--text)}
+  nav.tabs button.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+  .spacer{flex:1}
+  .search-wrap{position:relative;display:flex;align-items:center}
+  .search-wrap svg{position:absolute;left:10px;width:15px;height:15px;color:var(--text-dim);pointer-events:none}
+  #search{
+    width:240px;max-width:42vw;padding:8px 12px 8px 32px;border-radius:8px;
+    border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none;
+  }
+  #search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .theme-toggle{
+    border:1px solid var(--border);background:var(--bg-elev);color:var(--text-soft);
+    width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;
+  }
+  .theme-toggle:hover{color:var(--accent);border-color:var(--accent)}
+
+  /* layout */
+  .layout{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:248px 1fr;gap:0;min-height:calc(100vh - 57px)}
+  aside.sidebar{
+    border-right:1px solid var(--border);
+    padding:20px 14px 60px 20px;
+    position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto;
+  }
+  aside.sidebar h3{
+    font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);
+    margin:18px 0 8px;font-weight:700;
+  }
+  aside.sidebar h3:first-child{margin-top:0}
+  aside.sidebar a{
+    display:block;padding:5px 10px;border-radius:6px;color:var(--text-soft);
+    font-size:13.5px;line-height:1.4;
+  }
+  aside.sidebar a:hover{background:var(--bg-soft);color:var(--text);text-decoration:none}
+  aside.sidebar a.active{color:var(--accent);font-weight:600;background:var(--accent-soft)}
+  .sidebar-toggle{display:none}
+
+  main.content{padding:26px 32px 80px;min-width:0}
+  .module-head{margin-bottom:8px}
+  .module-head .kicker{color:var(--text-dim);font-size:12px;font-weight:600;letter-spacing:.05em}
+  .module-head h1{margin:4px 0 6px;font-size:26px}
+  .module-head p{margin:0;color:var(--text-soft);font-size:14px;max-width:760px}
+  .cat-title{
+    margin:38px 0 14px;font-size:18px;font-weight:700;padding-bottom:8px;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:8px;
+  }
+  .cat-title:first-of-type{margin-top:22px}
+  .cat-title .num{
+    font-size:12px;color:var(--text-dim);font-weight:500;background:var(--bg-soft);
+    padding:2px 8px;border-radius:20px;
+  }
+
+  /* term card */
+  .term{
+    scroll-margin-top:72px;
+    background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow);
+  }
+  .term-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .term-head .cn{font-size:18px;font-weight:700}
+  .term-head .en{font-size:13px;color:var(--text-dim);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .term-head .anchor{margin-left:auto;color:var(--text-dim);font-size:13px;cursor:pointer;opacity:0;transition:opacity .15s}
+  .term:hover .anchor{opacity:1}
+  .term-head .anchor:hover{color:var(--accent)}
+  .field{margin:12px 0;padding:0 2px}
+  .field .label{
+    font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--text-dim);display:flex;align-items:center;gap:6px;margin-bottom:5px;
+  }
+  .field .label .ic{width:14px;height:14px;flex:none}
+  .field .body{font-size:14.5px;color:var(--text)}
+  .field.explain .body{color:var(--text);font-size:15px}
+  .field.scenario{background:var(--ok-bg);border-radius:8px;padding:10px 12px;margin:12px 0}
+  .field.scenario .label{color:var(--ok)}
+  .field.pitfall{background:var(--warn-bg);border-radius:8px;padding:10px 12px;margin:12px 0}
+  .field.pitfall .label{color:var(--warn)}
+  code,kbd{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    background:var(--code-bg);padding:1px 6px;border-radius:5px;font-size:12.5px;
+    color:var(--accent);border:1px solid var(--border);
+  }
+  .related{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .related a{
+    font-size:12.5px;padding:3px 9px;border:1px solid var(--border);border-radius:20px;
+    background:var(--bg);color:var(--text-soft);
+  }
+  .related a:hover{border-color:var(--accent);color:var(--accent);text-decoration:none;background:var(--accent-soft)}
+  .refs{font-size:13px;color:var(--text-soft);margin-top:4px}
+  .refs a{margin-right:14px}
+
+  /* search results */
+  #searchResults{
+    position:fixed;top:57px;left:0;right:0;max-height:70vh;overflow-y:auto;
+    background:var(--bg-elev);border-bottom:1px solid var(--border);box-shadow:var(--shadow);
+    display:none;padding:8px 0;z-index:40;
+  }
+  #searchResults.show{display:block}
+  .sr-item{padding:8px 24px;cursor:pointer;border-left:3px solid transparent}
+  .sr-item:hover,.sr-item.hover{background:var(--bg-soft);border-left-color:var(--accent)}
+  .sr-item .sr-mod{font-size:11px;color:var(--text-dim);margin-right:8px}
+  .sr-item .sr-cn{font-weight:600}
+  .sr-item .sr-en{font-size:12px;color:var(--text-dim);margin-left:6px;font-family:ui-monospace,monospace}
+  .sr-item .sr-snippet{font-size:13px;color:var(--text-soft);margin-top:2px}
+  .sr-empty{padding:14px 24px;color:var(--text-dim);font-size:13px}
+  mark{background:var(--accent-soft);color:var(--accent);padding:0 2px;border-radius:3px}
+
+  /* mobile */
+  @media(max-width:880px){
+    .layout{grid-template-columns:1fr}
+    aside.sidebar{
+      position:fixed;left:0;top:57px;bottom:0;width:260px;z-index:45;
+      transform:translateX(-100%);transition:transform .2s;background:var(--bg-elev);
+    }
+    aside.sidebar.open{transform:translateX(0)}
+    .sidebar-toggle{
+      display:inline-flex;border:1px solid var(--border);background:var(--bg-elev);
+      width:36px;height:36px;border-radius:8px;align-items:center;justify-content:center;cursor:pointer;color:var(--text-soft);
+    }
+    main.content{padding:18px 16px 60px}
+    #search{width:140px}
+    nav.tabs button{padding:6px 10px;font-size:13px}
+  }
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:44}
+  .overlay.show{display:block}
+  footer{padding:24px;text-align:center;color:var(--text-dim);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="brand"><span class="dot"></span>Vibe Coding 术语库 <small>黑话翻译器</small></div>
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="目录">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="tabs" id="tabs"></nav>
+    <span class="spacer"></span>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="search" type="search" placeholder="搜索术语，如 switch / CORS…" autocomplete="off" />
+    </div>
+    <button class="theme-toggle" id="themeToggle" title="切换深浅色">🌙</button>
+  </div>
+</header>
+
+<div id="searchResults"></div>
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="content" id="content"></main>
+</div>
+
+<footer>内容基于 MDN / W3C / 全栈术语表整理 · 面向无 IT 基础的 vibecoding 与小调试场景 · 单文件离线可用</footer>
+
+<script>
+/* ===== 模块定义 ===== */
+const MODULES = [
+  { id:'frontend', name:'前端', en:'Frontend', desc:'用户在浏览器里直接看到、点到的那一层。HTML 搭结构、CSS 做样子、JavaScript 加交互。' },
+  { id:'network',  name:'Web 网络', en:'Network', desc:'浏览器和服务器之间怎么说话、怎么传数据、怎么管登录态。调试“接口不通/跨域/缓存”都在这里。' },
+  { id:'backend',  name:'后端', en:'Backend', desc:'跑在服务器上的那一层：处理业务逻辑、读写数据库、提供 API 给前端调用。' },
+  { id:'tooling',  name:'工具链', en:'Tooling', desc:'围绕代码本身的工具：版本控制、构建打包、依赖管理、调试排错。' },
+];
+
+/* ===== 词条数据 ===== */
+const TERMS = [
+/* ---------- 前端 ---------- */
+{id:'f-switch',module:'frontend',cat:'HTML 控件与表单',cn:'开关',en:'switch',
+ explain:'像电灯开关一样的两态按钮，只有“开/关”，用来表示某个设置是启用还是关闭。注意：HTML 原生没有 <code>switch</code> 元素，它来自组件库（Ant Design / Element Plus），底层多用 <code>&lt;input type="checkbox"&gt;</code> 实现。',
+ scenario:'做“夜间模式”“启用通知”这类开关不生效时；或表单里让用户开关某项功能、要把状态传给后端时。',
+ pitfall:'组件库的 switch 选中值常常是字符串 <code>"true"</code>/<code>"false"</code> 而不是布尔 true/false，直接传给后端或做 <code>if</code> 判断会出错；别和复选框 checkbox 混为一谈。',
+ related:['f-checkbox','f-button','f-input'],refs:[{n:'MDN input checkbox',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/input/checkbox'},{n:'Ant Design Switch',u:'https://ant.design/components/switch'}]},
+{id:'f-slider',module:'frontend',cat:'HTML 控件与表单',cn:'滑块',en:'slider',
+ explain:'可以拖动的条，用来在一个范围内选数值（如音量 0–100、价格区间）。原生对应 <code>&lt;input type="range"&gt;</code>，组件库的 slider 还支持双滑块选区间。',
+ scenario:'调“为什么滑块拖不动”“取不到当前值”“范围不对”时；或做价格/亮度调节器。',
+ pitfall:'原生 range 拿到的是字符串（<code>el.value</code>），做计算前要 <code>Number()</code> 转数字；步长 step 设错会导致取不到某些值。',
+ related:['f-input','f-switch'],refs:[{n:'MDN input range',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/input/range'}]},
+{id:'f-rate',module:'frontend',cat:'HTML 控件与表单',cn:'评分',en:'rate',
+ explain:'一排星星（或爱心），点第几颗就表示打几分，常见于商品/内容评分。这是组件库控件，HTML 原生没有，需要自己用按钮拼。',
+ scenario:'调“评分点不上”“分数提交不到后端”“只读半星不显示”时。',
+ pitfall:'<code>value</code> 通常是数字 1–5，别传成字符串；允许半星时取值是 0.5 的倍数，后端字段类型要能存小数。',
+ related:['f-button','f-input'],refs:[{n:'Ant Design Rate',u:'https://ant.design/components/rate'}]},
+{id:'f-select',module:'frontend',cat:'HTML 控件与表单',cn:'下拉选择',en:'select',
+ explain:'点开是一个选项列表，选一个（或多个）填回输入框。原生对应 <code>&lt;select&gt;&lt;option&gt;</code>，组件库的 Select 还支持搜索过滤、多选、远程加载选项。',
+ scenario:'调“选了没反应”“取不到选中值”“选项没加载出来”时；做省市区/分类选择时。',
+ pitfall:'原生 select 的 value 取自 <code>&lt;option value&gt;</code> 而不是显示文字；组件库多选时拿到的是数组而不是字符串，别按单选处理。',
+ related:['f-autocomplete','f-input'],refs:[{n:'MDN select',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/select'}]},
+{id:'f-autocomplete',module:'frontend',cat:'HTML 控件与表单',cn:'自动补全',en:'auto-complete',
+ explain:'输入框边打字边弹出匹配建议（如搜索框打“北”弹出“北京/南京”）。原生用 <code>&lt;datalist&gt;</code> 或 JS 实现，组件库叫 AutoComplete。',
+ scenario:'调“建议弹不出来”“选中后填不进框”“每打一个字就请求一次卡顿”时。',
+ pitfall:'要加防抖（debounce）再请求后端，否则每按一个键就发一次请求会刷爆接口；选中后要清掉建议列表，别让旧建议残留。',
+ related:['f-select','f-input'],refs:[{n:'MDN datalist',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/datalist'}]},
+{id:'f-checkbox',module:'frontend',cat:'HTML 控件与表单',cn:'复选 / 单选',en:'checkbox / radio',
+ explain:'checkbox 复选框可多选（勾上=选），radio 单选按钮一组里只能选一个。原生对应 <code>&lt;input type="checkbox"&gt;</code> / <code>&lt;input type="radio"&gt;</code>。',
+ scenario:'调“勾上了但取不到值”“单选能选两个”“提交时勾选状态丢了”时。',
+ pitfall:'checkbox 没勾时表单默认不提交这个字段（不是提交 false），后端要按“字段缺失=false”处理；radio 同组靠相同 <code>name</code> 绑定，name 写错就成多组。',
+ related:['f-switch','f-input','f-form'],refs:[{n:'MDN input checkbox',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/input/checkbox'}]},
+{id:'f-input',module:'frontend',cat:'HTML 控件与表单',cn:'输入框',en:'input',
+ explain:'让用户打字的方框。原生 <code>&lt;input&gt;</code> 靠 <code>type</code> 变身：text 文本、password 密码、number 数字、email 邮箱、date 日期等。',
+ scenario:'调“输入的内容拿不到”“数字框能输字母”“回车没反应”时。',
+ pitfall:'<code>el.value</code> 永远是字符串，数字框也要自己转 <code>Number()</code>；受控组件里改了 state 但 value 没绑回去会变成“打不了字”。',
+ related:['f-form','f-label-placeholder','f-autocomplete'],refs:[{n:'MDN input',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/input'}]},
+{id:'f-button',module:'frontend',cat:'HTML 控件与表单',cn:'按钮',en:'button',
+ explain:'点一下触发某个动作（提交、跳转、发请求）。原生 <code>&lt;button&gt;</code> 有三种 type：button 普通按钮、submit 提交表单、reset 重置。',
+ scenario:'调“点按钮没反应”“点了页面刷新了”“按钮变灰但还是能连点”时。',
+ pitfall:'<code>&lt;button&gt;</code> 不写 type 默认是 submit，放在表单里一点就提交刷新页面，要显式写 <code>type="button"</code>；提交时要禁用按钮防重复点击。',
+ related:['f-form','f-switch'],refs:[{n:'MDN button',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/button'}]},
+{id:'f-form',module:'frontend',cat:'HTML 控件与表单',cn:'表单',en:'form',
+ explain:'把一组输入控件打包、一次性提交给后端的容器。原生 <code>&lt;form&gt;</code>，提交方式由 method（GET/POST）和 action（地址）决定。',
+ scenario:'调“提交后参数没带过去”“提交就刷新页面”“文件上传失败”时。',
+ pitfall:'前端常被默认的 form 提交刷新坑到——现代写法多用 JS 接 <code>submit</code> 事件并 <code>preventDefault()</code> 拦截；上传文件要设 <code>enctype="multipart/form-data"</code>。',
+ related:['f-input','f-button','f-label-placeholder'],refs:[{n:'MDN form',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/form'}]},
+{id:'f-label-placeholder',module:'frontend',cat:'HTML 控件与表单',cn:'标签与占位符',en:'label / placeholder',
+ explain:'label 是输入框旁边那行说明文字（点它能聚焦到框）；placeholder 是框里灰色的提示文字，一打字就消失。',
+ scenario:'调“点文字没聚焦到框”“占位字不消失”“无障碍读屏读不到字段名”时。',
+ pitfall:'placeholder 不是字段名，别拿它当正式标签；label 要用 <code>for</code> 或包住控件来绑定，否则点 label 不会聚焦，无障碍也过不了。',
+ related:['f-input','f-form'],refs:[{n:'MDN label',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/label'}]},
+{id:'f-box-model',module:'frontend',cat:'CSS 概念',cn:'盒模型',en:'box model',
+ explain:'浏览器把每个元素都当一个“盒子”算尺寸：内容 content + 内边距 padding + 边框 border + 外边距 margin。元素最终占多大由它决定。',
+ scenario:'调“按钮位置错位”“元素超出/滚动条出现”“设了宽度却被撑大”时。',
+ pitfall:'默认 <code>width</code> 只算 content，加了 padding/border 后实际更宽会撑破布局；可用 <code>box-sizing:border-box</code> 让 width 包含 padding+border，几乎成了行业默认。',
+ related:['f-flexbox'],refs:[{n:'MDN 盒模型',u:'https://developer.mozilla.org/zh-CN/docs/Learn/CSS/Building_blocks/The_box_model'}]},
+{id:'f-flexbox',module:'frontend',cat:'CSS 概念',cn:'弹性布局',en:'flexbox',
+ explain:'一种一维排版方式（一行或一列），靠 <code>display:flex</code> 开启，子元素能自动对齐、分配空间、自适应，是当下最常用的布局工具。',
+ scenario:'调“几个按钮对不齐”“内容居不了中”“一长就换行挤变形”时。',
+ pitfall:'flex 只管一行/一列方向，做二维网格要用 <code>display:grid</code>；子元素设了固定宽又设 flex 可能冲突，常见是“怎么都缩不小”。',
+ related:['f-box-model'],refs:[{n:'MDN flexbox',u:'https://developer.mozilla.org/zh-CN/docs/Learn/CSS/CSS_layout/Flexbox'}]},
+{id:'f-event',module:'frontend',cat:'JavaScript 核心',cn:'事件 / 事件监听',en:'event',
+ explain:'用户做了什么（点击、输入、按键、移动鼠标），浏览器就发一个“事件”，你提前挂的监听函数就会跑。常见 <code>click</code>、<code>input</code>、<code>change</code>、<code>submit</code>。',
+ scenario:'调“点按钮没触发”“输入一个字触发两次”“拿不到点击的元素”时。',
+ pitfall:'事件处理函数拿到的参数 <code>e</code> 才是事件对象，要取值用 <code>e.target.value</code>；忘了 <code>preventDefault()</code> 会让链接跳转/表单刷新；动态生成的元素直接绑定会绑不上（要事件委托）。',
+ related:['f-promise','f-input'],refs:[{n:'MDN 事件介绍',u:'https://developer.mozilla.org/zh-CN/docs/Learn/JavaScript/Building_blocks/Events'}]},
+{id:'f-promise',module:'frontend',cat:'JavaScript 核心',cn:'Promise / async',en:'Promise / async / await',
+ explain:'处理“要等一会儿才有结果”的事（如发请求、读文件）。Promise 是个“承诺未来给结果”的对象，async/await 是写起来更顺的语法糖，让异步代码长得像同步。',
+ scenario:'调“拿到的是 undefined 而不是数据”“代码没等请求完就往下跑了”“请求还没回来就报错”时。',
+ pitfall:'<code>await</code> 只能在 <code>async</code> 函数里用；忘了 await 会拿到 Promise 对象而不是数据；多个串行 await 会慢，相互独立的可用 <code>Promise.all</code> 并行。',
+ related:['f-event','f-fetch'],refs:[{n:'MDN Promise',u:'https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise'},{n:'MDN async/await',u:'https://developer.mozilla.org/zh-CN/docs/Learn/JavaScript/Asynchronous/Promises'}]},
+{id:'f-component',module:'frontend',cat:'框架术语',cn:'组件 / props / state',en:'component / props / state',
+ explain:'框架（React/Vue）里把界面拆成一个个可复用的“组件”（如一个按钮卡片）。props 是从外面传进来的数据（只读），state 是组件自己内部、会变的状态。',
+ scenario:'调“改了数据界面没更新”“父组件传值子组件拿不到”“点一下重新渲染丢状态”时。',
+ pitfall:'props 不能在子组件里直接改（要靠父组件改）；state 更新是异步批处理的，紧接着读旧值会读到改之前的；直接改 state 变量（不经过 setState）界面不会刷新。',
+ related:['f-event','f-promise'],refs:[{n:'MDN 组件思维',u:'https://developer.mozilla.org/zh-CN/docs/Learn/Tools_and_testing/Client-side_JavaScript_frameworks'}]},
+
+/* ---------- Web 网络 ---------- */
+{id:'n-http',module:'network',cat:'HTTP 基础',cn:'HTTP / HTTPS',en:'HTTP / HTTPS',
+ explain:'浏览器和服务器之间通信用的规矩。HTTP 是明文，HTTPS = HTTP + 加密（SSL/TLS），网址上的小锁就是它。请求里带“我要什么”，响应里带“结果和数据”。',
+ scenario:'调“接口请求发不出去”“HTTPS 网站报不安全”“混合内容被拦截”时。',
+ pitfall:'HTTP 站点上调用的接口如果也是 HTTP 会被当不安全拦截；HTTPS 页面里混用 HTTP 资源（图片/接口）会被浏览器直接挡掉，叫“混合内容”。',
+ related:['n-request-response','n-status-code','n-cors'],refs:[{n:'MDN HTTP 概述',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview'}]},
+{id:'n-request-response',module:'network',cat:'HTTP 基础',cn:'请求与响应',en:'request / response',
+ explain:'一次通信有两半：请求（request）是浏览器发给服务器的，带方法、地址、参数；响应（response）是服务器回的，带状态码和数据。',
+ scenario:'调“请求参数没带过去”“响应拿不到数据”“响应被截断”时。',
+ pitfall:'GET 请求的参数拼在 URL 上，POST 的参数在 body 里，搞混就收不到；响应体可能是 JSON 字符串，要 <code>res.json()</code> 解析才能当对象用。',
+ related:['n-http','n-methods'],refs:[{n:'MDN HTTP 消息',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Messages'}]},
+{id:'n-methods',module:'network',cat:'HTTP 基础',cn:'请求方法',en:'GET / POST / PUT / DELETE',
+ explain:'告诉服务器“这个请求要干嘛”的动词。GET 取数据、POST 新建/提交、PUT 更新整体、DELETE 删除。约定俗成对应增删改查。',
+ scenario:'调“用了 GET 但参数太长被截”“该改数据却用了 GET 没生效”“该删却删不掉”时。',
+ pitfall:'别用 GET 改数据——GET 应无副作用且能被缓存/被浏览器预加载，改数据要用 POST/PUT/PATCH/DELETE；有些接口方法写错会返回 405。',
+ related:['n-request-response','n-status-code','b-crud'],refs:[{n:'MDN HTTP 方法',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods'}]},
+{id:'n-status-code',module:'network',cat:'HTTP 基础',cn:'状态码',en:'status code',
+ explain:'响应里一个三位数字，表示这次请求结果如何。2xx 成功（200 OK）、3xx 跳转（301/302）、4xx 你这边错了（404 找不到、403 没权限、401 没登录）、5xx 服务器错了（500）。',
+ scenario:'调“接口报 404”“报 403/401”“报 500”时——先看状态码再定位。',
+ pitfall:'别只看“接口报错”，要看具体码：404 多半是地址/路由写错，401 是没带登录态，403 是登录了但没权限，500 是后端炸了要找后端。',
+ related:['n-http','n-methods'],refs:[{n:'MDN HTTP 状态码',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status'}]},
+{id:'n-cors',module:'network',cat:'跨域',cn:'跨域资源共享',en:'CORS',
+ explain:'浏览器的一种安全机制：网页从一个域名访问另一个域名的接口时，默认会被拦，除非对方服务器在响应头里明确“允许你访问”。这个放行机制就是 CORS。',
+ scenario:'调“接口报 CORS 错”“控制台红字 ‘blocked by CORS policy’”“本地能跑上线不行”时。',
+ pitfall:'CORS 是浏览器拦的、不是后端拦的，用 Postman 测没问题不代表网页能通；要在被访问的后端配响应头（<code>Access-Control-Allow-Origin</code>），不是在前端配。',
+ related:['n-same-origin','n-http'],refs:[{n:'MDN CORS',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CORS'}]},
+{id:'n-same-origin',module:'network',cat:'跨域',cn:'同源策略',en:'Same-Origin Policy',
+ explain:'浏览器的底层安全规则：网页只能读写“同源”（协议+域名+端口都相同）的资源，跨源的默认不让碰。CORS 就是为了在它之下有控制地放行。',
+ scenario:'调“iframe 读不到父页面”“fetch 跨域被拒”“嵌入的接口报错”时。',
+ pitfall:'“同源”要协议、域名、端口三者全相同；<code>http://a.com</code> 和 <code>https://a.com</code> 不同源，<code>a.com:80</code> 和 <code>a.com:81</code> 也不同源。',
+ related:['n-cors','n-http'],refs:[{n:'MDN 同源策略',u:'https://developer.mozilla.org/zh-CN/docs/Web/Security/Same-origin_policy'}]},
+{id:'n-ajax',module:'network',cat:'通信',cn:'AJAX',en:'AJAX',
+ explain:'一个老说法：不刷新整个页面、在后台偷偷和服务器交换数据、只更新页面一部分的技术。早期用 XMLHttpRequest，现在多被 Fetch 取代。',
+ scenario:'调“老代码里看到 XMLHttpRequest”“提交后页面不该刷新却刷新了”时。',
+ pitfall:'AJAX 不是新语言、也不是某个库，是一种“局部刷新”的思路；新项目直接用 Fetch 或 axios，别再用 XMLHttpRequest 手写。',
+ related:['n-fetch','n-request-response'],refs:[{n:'MDN AJAX 起步',u:'https://developer.mozilla.org/zh-CN/docs/Learn/JavaScript/Client-side_web_APIs/Fetching_data'}]},
+{id:'n-fetch',module:'network',cat:'通信',cn:'Fetch',en:'Fetch',
+ explain:'浏览器自带的发请求函数 <code>fetch(url)</code>，返回 Promise，是现在最常用的发请求方式，不用装库就能用。',
+ scenario:'调“fetch 拿不到数据”“没带 cookie”“4xx 5xx 不进 catch”时。',
+ pitfall:'fetch 只在网络错误时才 reject，HTTP 4xx/5xx 仍算“成功 resolve”，要自己判 <code>res.ok</code>；默认不带 cookie，跨域要登录态要设 <code>credentials: "include"</code>。',
+ related:['n-ajax','n-request-response','f-promise'],refs:[{n:'MDN Fetch API',u:'https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API'}]},
+{id:'n-api',module:'network',cat:'通信',cn:'接口 / API',en:'API',
+ explain:'前后端约定好的一组“窗口”：前端按规矩发请求，后端按规矩回数据。API 就是这组规矩的总称（地址、参数、返回格式）。',
+ scenario:'调“接口字段对不上”“接口返回结构变了”“不知道怎么调用”时。',
+ pitfall:'API 的返回字段名/结构是双方约定的，后端改了前端没改就会“取到 undefined”；调试先看接口文档和实际返回的 JSON 对齐字段。',
+ related:['n-request-response','b-rest'],refs:[{n:'MDN API 概念',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/API'}]},
+{id:'n-json',module:'network',cat:'数据格式',cn:'JSON',en:'JSON',
+ explain:'一种用文本表示结构化数据的格式（长得像 JS 对象）。前后端交换数据几乎都用它，因为轻、好读、跨语言。',
+ scenario:'调“JSON 解析失败”“字段拿不到”“日期变成字符串”时。',
+ pitfall:'JSON 键必须用双引号、不能有注释、不能有尾逗号，否则 <code>JSON.parse</code> 报错；JSON 没日期类型，时间会被序列化成字符串，前端要自己转。',
+ related:['n-request-response','n-api'],refs:[{n:'MDN JSON',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/JSON'}]},
+{id:'n-cookie',module:'network',cat:'会话与安全',cn:'Cookie',en:'Cookie',
+ explain:'浏览器存在你电脑上的一小段数据，每次请求某个域名都会自动带上它。常用来存“登录凭证”这类信息。',
+ scenario:'调“登录后接口还是没登录态”“跨域 cookie 带不过去”“cookie 丢了”时。',
+ pitfall:'cookie 受同源 + 各种属性限制：跨域要带要设 SameSite=None + Secure；HttpOnly 的 cookie 前端 JS 读不到（防 XSS 偷登录态）；过期/域名设错会“丢”。',
+ related:['n-session','n-token-jwt','n-same-origin'],refs:[{n:'MDN HTTP Cookie',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Cookies'}]},
+{id:'n-session',module:'network',cat:'会话与安全',cn:'Session',en:'Session',
+ explain:'一种“服务器记着你这次会话”的机制：你登录后，服务器存一份你的信息（session），发一个 id 给你（通常放 cookie），下次你带 id 来它就认得你。',
+ scenario:'调“登录态一会儿就掉”“多端登录串号”“重启服务后都掉登录”时。',
+ pitfall:'session 存在服务器内存里，服务重启或多台服务器没共享 session 会掉登录；现在很多项目改用无状态的 Token/JWT 来避开这问题。',
+ related:['n-cookie','n-token-jwt'],refs:[{n:'MDN Session',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/Session'}]},
+{id:'n-token-jwt',module:'network',cat:'会话与安全',cn:'Token / JWT',en:'token / JWT',
+ explain:'登录成功后服务器发给你一串“令牌”（token），你之后每次请求都带上它证明“我登录过”。JWT 是一种常见的 token 格式：头部+载荷+签名三段。',
+ scenario:'调“登录后接口 401”“token 过期”“token 被篡改”时。',
+ pitfall:'JWT 的载荷只是 base64 编码、不是加密，别往里塞密码等敏感信息；token 要存在安全地方，前端存 localStorage 易被 XSS 偷；过期要刷新机制。',
+ related:['n-cookie','n-session','b-auth'],refs:[{n:'MDN JWT',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/JWT'},{n:'jwt.io',u:'https://jwt.io/'}]},
+{id:'n-cdn',module:'network',cat:'缓存',cn:'CDN',en:'CDN',
+ explain:'一堆分布各地的缓存服务器。用户请求静态资源（图片、JS、CSS）时，就近从离他最近的节点取，速度快、还减轻主服务器压力。',
+ scenario:'调“资源加载慢”“CDN 上旧版本不更新”“CDN 链接 404”时。',
+ pitfall:'CDN 缓存的旧版本不会自动更新，要靠改文件名/加版本号让缓存失效；CDN 挂了整站资源就 404，要有兜底或换源。',
+ related:['n-cache','n-http'],refs:[{n:'MDN CDN',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/CDN'}]},
+{id:'n-cache',module:'network',cat:'缓存',cn:'缓存',en:'cache',
+ explain:'把“刚取过的东西”临时存一份，下次再要就直接给存的、不再去服务器要，省时间省流量。分浏览器缓存和 CDN/服务器缓存。',
+ scenario:'调“改了代码但页面没更新”“接口数据不刷新”“图片一直是旧的”时。',
+ pitfall:'前端改了资源但浏览器还用旧的——这是缓存，强刷（Ctrl+F5）或加版本号/hash 文件名解决；接口要禁缓存就加时间戳或设 no-cache 头。',
+ related:['n-cdn','n-http'],refs:[{n:'MDN HTTP 缓存',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Caching'}]},
+
+/* ---------- 后端 ---------- */
+{id:'b-rest',module:'backend',cat:'API 架构',cn:'REST',en:'REST',
+ explain:'一种最常见的 API 设计风格：把东西当成“资源”，用 HTTP 方法（GET 取、POST 建、PUT 改、DELETE 删）操作它们，每个资源有自己的 URL。',
+ scenario:'调“接口路径怎么设计”“RESTful 是什么”“同一个地址不同方法”时。',
+ pitfall:'REST 只是风格不是硬标准，不同团队实现细节（路径、返回结构）会不同；别把动作塞进 URL（如 <code>/getUser</code>），RESTful 倾向 <code>GET /users</code>。',
+ related:['b-graphql','b-endpoint','b-crud'],refs:[{n:'MDN REST',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/REST'}]},
+{id:'b-graphql',module:'backend',cat:'API 架构',cn:'GraphQL',en:'GraphQL',
+ explain:'另一种 API 风格：只有一个端点，前端用一种查询语言精确说“我要哪些字段”，后端只返回这些字段，避免取多或取少。',
+ scenario:'调“一个页面要发好几个接口”“GraphQL 查询报错”“字段嵌套太深”时。',
+ pitfall:'GraphQL 一个请求可能查很深导致后端性能问题，要加查询深度/复杂度限制；它不是 REST 的替代品，学习曲线和缓存策略都不同。',
+ related:['b-rest','b-endpoint'],refs:[{n:'GraphQL 官网',u:'https://graphql.org/'}]},
+{id:'b-endpoint',module:'backend',cat:'API 架构',cn:'端点',en:'endpoint',
+ explain:'API 的一个具体“入口地址”，比如 <code>GET /api/users/123</code> 就是一个端点（地址+方法组合）。前端调接口就是调某个端点。',
+ scenario:'调“404 找不到接口”“端点路径拼错”“一个端点多个方法”时。',
+ pitfall:'端点区分大小写、斜杠敏感：<code>/users</code> 和 <code>/users/</code> 可能是两个东西；端点路径和参数拼错是最常见的 404 来源。',
+ related:['b-rest','b-route'],refs:[{n:'MDN Endpoint',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/Endpoint'}]},
+{id:'b-route',module:'backend',cat:'API 架构',cn:'路由',en:'route',
+ explain:'后端收到一个请求后，按它的“地址+方法”决定交给哪段代码处理的规则表。比如“<code>GET /users</code> 交给列表函数”。前端框架里也有路由，决定哪个 URL 显示哪个页面。',
+ scenario:'调“加了新接口但不生效”“URL 不匹配”“路由顺序冲突”时。',
+ pitfall:'路由匹配顺序很重要：先定义的具体路由可能被后定义的通配路由“抢走”；动态参数 <code>/users/:id</code> 和静态 <code>/users/me</code> 谁先谁后要小心。',
+ related:['b-endpoint','b-rest'],refs:[{n:'MDN 路由',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/Route'}]},
+{id:'b-crud',module:'backend',cat:'数据',cn:'增删改查',en:'CRUD',
+ explain:'对数据最基本的四种操作：Create 建、Read 读、Update 改、Delete 删。几乎所有后台管理系统都是围着这四件事转，正好对应 HTTP 的 POST/GET/PUT(PATCH)/DELETE。',
+ scenario:'调“某个操作缺了对应接口”“权限没覆盖全部 CRUD”“删除是软删还是硬删”时。',
+ pitfall:'别只实现了读没实现改就以为做完了；删除常做“软删除”（标记 deleted 不真删），前端看到“删了”但数据还在，要按 deleted 字段过滤。',
+ related:['b-rest','b-sql','b-database'],refs:[{n:'MDN CRUD',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/CRUD'}]},
+{id:'b-sql',module:'backend',cat:'数据',cn:'SQL',en:'SQL',
+ explain:'关系型数据库（如 MySQL/PostgreSQL）的查询语言，用接近英语的句子操作表里的数据：<code>SELECT * FROM users WHERE id=1</code>。',
+ scenario:'调“查询慢”“查不到数据”“SQL 语法报错”时。',
+ pitfall:'拼接 SQL 字符串易出“SQL 注入”漏洞——别人在输入里塞 SQL 片段，要用参数化查询/ORM 而不是直接拼字符串；联表多了会慢，要看执行计划。',
+ related:['b-crud','b-database','b-orm'],refs:[{n:'MDN SQL',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/SQL'}]},
+{id:'b-nosql',module:'backend',cat:'数据',cn:'NoSQL',en:'NoSQL',
+ explain:'一类“不强制表结构”的数据库（如 MongoDB 存类 JSON 文档、Redis 存键值）。适合结构常变、要快读写的场景，但不擅长复杂关联查询。',
+ scenario:'调“文档结构不统一”“要不要用 NoSQL”“关联查询难写”时。',
+ pitfall:'NoSQL“灵活”不代表不用设计——文档结构乱、没索引照样慢且难维护；需要复杂关联时关系型数据库可能更合适，别为用而用。',
+ related:['b-sql','b-database'],refs:[{n:'MDN NoSQL',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/NoSQL'}]},
+{id:'b-orm',module:'backend',cat:'数据',cn:'对象关系映射',en:'ORM',
+ explain:'一层“翻译官”：让你用代码里的对象操作数据库（如 <code>User.find(1)</code> 自动变成 <code>SELECT</code>），不用手写 SQL。',
+ scenario:'调“ORM 生成的 SQL 不对”“性能慢”“复杂查询写不出来”时。',
+ pitfall:'ORM 简单查询方便，复杂/高频查询可能生成低效 SQL，必要时回落到手写 SQL；不同 ORM 行为差异大，调试要看它实际生成的 SQL。',
+ related:['b-sql','b-database','b-crud'],refs:[{n:'MDN ORM',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/ORM'}]},
+{id:'b-database',module:'backend',cat:'数据',cn:'数据库 / 表 / 记录',en:'database / table / record',
+ explain:'存数据的地方。database 是整个库，table 是一类数据排成的表（像 Excel 表），record 是表里一行（一条具体数据）。',
+ scenario:'调“数据存进去了吗”“查不到刚插的”“字段类型不对”时。',
+ pitfall:'字段类型要和存的数据匹配（如时间用 datetime 不是字符串）；自增 id 主键、索引没建会导致查询变慢；并发写入要考虑锁/事务。',
+ related:['b-sql','b-crud'],refs:[{n:'MDN Database',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/Database'}]},
+{id:'b-node',module:'backend',cat:'运行时',cn:'Node.js',en:'Node.js',
+ explain:'一个能让你用 JavaScript 写后端的运行环境（以前 JS 只在浏览器跑）。用事件驱动、非阻塞 IO，常用来写 API 服务、工具脚本。',
+ scenario:'调“node 服务起不来”“端口被占”“依赖装不上”时。',
+ pitfall:'Node 是单线程的，一个 CPU 密集任务会卡住整个进程；版本不匹配会导致某些依赖装不上/跑不了，用 nvm 管版本。',
+ related:['b-npm','b-middleware'],refs:[{n:'Node.js 官网',u:'https://nodejs.org/zh'}]},
+{id:'b-npm',module:'backend',cat:'运行时',cn:'npm / 包 / 依赖',en:'npm / package / dependency',
+ explain:'npm 是 JS 的包管理器，package 是一个可复用的代码包，dependency 是你的项目依赖（要装才能跑）的别人的包，记在 <code>package.json</code> 里。',
+ scenario:'调“依赖装不上”“版本冲突”“node_modules 没了”时。',
+ pitfall:'<code>package.json</code> 锁版本很重要，否则不同机器装出不同版本就“在我电脑能跑”；别把 <code>node_modules</code> 提交进 git，靠 <code>package-lock.json</code> 还原。',
+ related:['b-node','t-dependency'],refs:[{n:'npm 文档',u:'https://docs.npmjs.com/'}]},
+{id:'b-middleware',module:'backend',cat:'运行时',cn:'中间件',en:'middleware',
+ explain:'请求进来到最终处理之间的一串“关卡函数”，每个干一件事（记日志、鉴权、解析 body、报错处理），然后放行给下一个。Express/Koa 都这套路。',
+ scenario:'调“接口没经过鉴权”“body 解析不出来”“日志没记上”时。',
+ pitfall:'中间件顺序很关键：放错了会先放行后鉴权；忘了 <code>next()</code> 请求就卡住不往下走；错误处理中间件要放最后且签名要四个参数。',
+ related:['b-node','b-route'],refs:[{n:'MDN Middleware',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/Middleware'}]},
+{id:'b-env',module:'backend',cat:'运行时',cn:'环境变量',en:'env',
+ explain:'存在运行环境里、代码之外的一组配置值（如数据库密码、API 密钥、端口），通过 <code>process.env.XXX</code> 读取。不同环境（开发/生产）值不同。',
+ scenario:'调“本地能跑上线不行”“密钥硬编码被警告”“配置读不到”时。',
+ pitfall:'密钥千万别硬编码进代码、也别提交进 git，要用 <code>.env</code> 文件并加进 <code>.gitignore</code>；前后端里暴露给浏览器的变量要区分（前端能被看到）。',
+ related:['b-node'],refs:[{n:'MDN 环境变量',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/Environment_variable'}]},
+{id:'b-auth',module:'backend',cat:'认证与授权',cn:'认证 / 授权',en:'authentication / authorization',
+ explain:'authentication 认证=“你是谁”（登录、验证身份）；authorization 授权=“你能干嘛”（你登录了，但不一定有权限删别人的东西）。两个常被混但不一样。',
+ scenario:'调“登录了但操作被拒”“权限角色不生效”“401 还是 403 分不清”时。',
+ pitfall:'401 是“没认证/没登录”（你是谁？），403 是“认证了但没授权”（你不能干这个）；别把权限检查做成“登录就行”。',
+ related:['n-token-jwt','b-oauth'],refs:[{n:'MDN 认证',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/Authentication'}]},
+{id:'b-oauth',module:'backend',cat:'认证与授权',cn:'OAuth',en:'OAuth',
+ explain:'一种“授权代登录”协议：你不用把账号密码给第三方，而是点“用微信/Google 登录”，由它们确认身份后给第三方一个令牌。常见于第三方登录。',
+ scenario:'调“第三方登录跳转回来失败”“拿不到用户信息”“回调地址不对”时。',
+ pitfall:'OAuth 流程涉及多次跳转和回调，回调地址必须和后台配置一致否则报错；scope（申请的权限范围）要写对才能拿到对应信息。',
+ related:['b-auth','n-token-jwt'],refs:[{n:'OAuth 官网',u:'https://oauth.net/'}]},
+
+/* ---------- 工具链 ---------- */
+{id:'t-git',module:'tooling',cat:'版本控制',cn:'Git',en:'Git',
+ explain:'一个记录代码每次改动历史的工具。你能随时回到旧版本、开分支同时干几条线、和别人合并代码而不丢东西。GitHub/Gitee 是托管 Git 仓库的网站。',
+ scenario:'调“改崩了想回退”“代码冲突了”“怎么撤销上次提交”时。',
+ pitfall:'<code>git push --force</code> 会覆盖远端别人的提交，别乱用；<code>git reset --hard</code> 会丢未提交改动，先确认；提交前 <code>git status</code> 看清改了什么。',
+ related:['t-commit','t-branch','t-repo'],refs:[{n:'Git 官网',u:'https://git-scm.com/book/zh/v2'}]},
+{id:'t-commit',module:'tooling',cat:'版本控制',cn:'提交',en:'commit',
+ explain:'把当前改动“存成一个存档点”，附一句话说明改了啥。每个 commit 有唯一 id，是回溯历史的单位。',
+ scenario:'调“提交信息写不好”“想改最近一次提交”“提交了不该提交的文件”时。',
+ pitfall:'commit 信息要写清楚“为什么改”而不是“改了 a.txt”；一次提交塞太多无关改动会难以回滚；提交了敏感文件要用 <code>git rm --cached</code> 并加进 gitignore。',
+ related:['t-git','t-branch'],refs:[{n:'Pro Git 提交',u:'https://git-scm.com/book/zh/v2/Git-基础-记录每次更新到仓库'}]},
+{id:'t-branch',module:'tooling',cat:'版本控制',cn:'分支',en:'branch',
+ explain:'从主线分出来的一条“平行开发线”，你在上面改不影响主线。常用法：每个功能/每个人开一个分支，改完再合回主线。',
+ scenario:'调“在哪个分支上改”“切分支带走没提交的改动”“分支名混乱”时。',
+ pitfall:'长时间不合并的分支会和主线差太远、合并时冲突爆炸；切分支前先 <code>git status</code> 确认没未提交改动，否则会被“带过去”。',
+ related:['t-git','t-merge','t-push-pull'],refs:[{n:'Pro Git 分支',u:'https://git-scm.com/book/zh/v2/Git-分支-分支简介'}]},
+{id:'t-merge',module:'tooling',cat:'版本控制',cn:'合并',en:'merge',
+ explain:'把另一个分支的改动并入当前分支。两分支都改了同一处就会“冲突”，要人工选保留哪边再继续。',
+ scenario:'调“合并冲突怎么解决”“合并后代码不对”“冲突一堆”时。',
+ pitfall:'冲突时别慌，逐个文件看 <code>&lt;&lt;&lt;</code> 标记选要保留的部分，别直接全留一边丢逻辑；大冲突先 <code>git merge --abort</code> 退出再重来。',
+ related:['t-branch','t-git'],refs:[{n:'Pro Git 合并',u:'https://git-scm.com/book/zh/v2/Git-分支-分支的合并'}]},
+{id:'t-push-pull',module:'tooling',cat:'版本控制',cn:'推送 / 拉取',en:'push / pull',
+ explain:'push 把本地提交传到远端仓库，pull 把远端最新改动拉到本地。和团队协作就是靠这两个同步代码。',
+ scenario:'调“push 被拒”“pull 下来冲突”“本地和远端不一致”时。',
+ pitfall:'push 被拒多半是远端有新提交你没拉，先 <code>git pull</code> 合并再 push；pull 前先提交本地改动，避免被合并弄乱。',
+ related:['t-git','t-branch','t-repo'],refs:[{n:'Pro Git 远程',u:'https://git-scm.com/book/zh/v2/Git-基础-远程仓库的使用'}]},
+{id:'t-repo',module:'tooling',cat:'版本控制',cn:'仓库',en:'repository',
+ explain:'一个项目对应的一个 Git 仓库，里面装着这个项目全部代码和改动历史。本地有一份，远端（GitHub）也有一份。',
+ scenario:'调“clone 不下来”“仓库太大”“子模块拉不下来”时。',
+ pitfall:'<code>.gitignore</code> 没配好会把 <code>node_modules</code> 等大目录提交进去，仓库膨胀；删了文件但没 <code>git rm</code> 会在历史里残留。',
+ related:['t-git','t-push-pull'],refs:[{n:'Pro Git 仓库',u:'https://git-scm.com/book/zh/v2/Git-基础-获取-Git-仓库'}]},
+{id:'t-build',module:'tooling',cat:'构建与调试',cn:'构建',en:'build',
+ explain:'把源码（可能用了新语法、框架、TypeScript）转换成浏览器能直接跑的产物（普通 JS/CSS/HTML）的过程，还会做压缩、优化。',
+ scenario:'调“build 报错”“build 后跑不起来”“开发能跑 build 不行”时。',
+ pitfall:'开发时跑（dev）和 build 后跑环境不同：dev 有热更新不压缩，build 会暴露真实路径/环境问题；上线前一定要本地跑一遍 build 产物。',
+ related:['t-bundle','t-dependency'],refs:[{n:'MDN 构建工具',u:'https://developer.mozilla.org/zh-CN/docs/Learn/Tools_and_testing/Understanding_client-side_tools'}]},
+{id:'t-bundle',module:'tooling',cat:'构建与调试',cn:'打包',en:'bundle',
+ explain:'把很多个小 JS/CSS 文件合并成一两个大文件，减少浏览器请求数、提升加载速度。Webpack/Vite 都干这事。',
+ scenario:'调“打包后体积太大”“打包后样式丢了”“chunk 报错”时。',
+ pitfall:'打包太大要“代码分割”（按需加载）别全塞一个文件；打包后路径是绝对/相对要和部署目录对上，否则资源 404。',
+ related:['t-build','t-dependency'],refs:[{n:'MDN 打包',u:'https://developer.mozilla.org/zh-CN/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Introducing_complete_toolchain'}]},
+{id:'t-dependency',module:'tooling',cat:'构建与调试',cn:'依赖',en:'dependency',
+ explain:'你的项目要靠别人写好的包才能跑，这些包就是依赖。装一次它们就进 <code>node_modules</code>，靠 <code>package.json</code> 记录清单。',
+ scenario:'调“依赖装不上”“版本不兼容”“装完跑不了”时。',
+ pitfall:'依赖版本范围写太松（如 <code>^1.0.0</code>）会在不同时间装出不同小版本导致“突然坏了”，用 lock 文件锁死；删 <code>node_modules</code> 重装是万能第一招。',
+ related:['t-build','b-npm'],refs:[{n:'npm 依赖',u:'https://docs.npmjs.com/cli/v10/configuring-npm/package-json'}]},
+{id:'t-lint',module:'tooling',cat:'构建与调试',cn:'代码检查',en:'lint',
+ explain:'一个自动“挑刺”工具，按一套规则检查代码风格和潜在错误（没用的变量、少分号、== 等），让你和团队写法统一、少踩坑。',
+ scenario:'调“一堆红色波浪线”“lint 不让提交”“规则太严”时。',
+ pitfall:'lint 报错不是语法错误，代码可能能跑但不合规范；可以配置规则或加忽略，别为了过 lint 写奇怪代码；保存自动修（format on save）很省心。',
+ related:['t-build'],refs:[{n:'ESLint',u:'https://eslint.org/'}]},
+{id:'t-console',module:'tooling',cat:'构建与调试',cn:'控制台',en:'console',
+ explain:'浏览器按 F12 打开的开发者工具里的一个面板。可以在代码里用 <code>console.log</code> 打印变量看值，也能直接在里面敲 JS 跑。是前端调试主战场。',
+ scenario:'调“值到底等于多少”“为什么走到这个分支”“接口返回啥”时。',
+ pitfall:'<code>console.log</code> 打对象有时显示的是“最终值”不是“当时值”（引用问题），要看快照用 <code>JSON.stringify</code> 或断点；上线记得清掉调试 log。',
+ related:['t-breakpoint','t-log'],refs:[{n:'MDN 控制台',u:'https://developer.mozilla.org/zh-CN/docs/Web/API/console'}]},
+{id:'t-breakpoint',module:'tooling',cat:'构建与调试',cn:'断点',en:'breakpoint',
+ explain:'在代码某行设一个“暂停点”，程序跑到这里就停住，你能一步步往下走、边走边看每个变量的值。比满屏 console.log 更精准。',
+ scenario:'调“不知道变量哪一步变错了”“循环里某次出问题”“函数没被调用”时。',
+ pitfall:'断点停在压缩后的代码会很难看，用 sourcemap 映射回源码；条件断点（满足条件才停）能避免循环里停几百次。',
+ related:['t-console','t-stack-trace'],refs:[{n:'MDN 断点调试',u:'https://developer.mozilla.org/zh-CN/docs/Learn/Common_questions/What_are_browser_developer_tools'}]},
+{id:'t-stack-trace',module:'tooling',cat:'构建与调试',cn:'调用栈',en:'stack trace',
+ explain:'报错时那一长串“谁调用了谁”的列表，从出错的那行一直往上追到最开始调用的地方。顺着它就能找到错误的根源。',
+ scenario:'调“报错不知道哪行引起的”“错误来自第三方库”“定位不到源头”时。',
+ pitfall:'看 stack trace 从最上面（出错点）往上看调用链，别只看最下面那行；压缩代码的 stack 行号没用，要 sourcemap 才能映射回源码行。',
+ related:['t-console','t-breakpoint','t-log'],refs:[{n:'MDN 调用栈',u:'https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Error/stack'}]},
+{id:'t-log',module:'tooling',cat:'构建与调试',cn:'日志',en:'log',
+ explain:'程序运行时按时间记下来“发生了什么”的文字记录。前端用 console，后端写到文件/日志服务。出问题时翻日志找线索。',
+ scenario:'调“线上出问题没现场”“不知道请求走到哪了”“定时任务有没有跑”时。',
+ pitfall:'日志太少出问题查不到、太多又会刷屏占空间，要分级别（error/warn/info）和保留时长；别把密码/敏感信息打进日志。',
+ related:['t-console','t-stack-trace'],refs:[{n:'MDN console',u:'https://developer.mozilla.org/zh-CN/docs/Web/API/console'}]},
+{id:'t-docker',module:'tooling',cat:'构建与调试',cn:'Docker',en:'Docker',
+ explain:'把程序和它要跑的整个环境（依赖、系统库、配置）打包成一个“容器”，到哪台机器都能一模一样地跑，解决“在我电脑能跑在你那不行”。',
+ scenario:'调“本地能跑线上不行”“环境装不上”“依赖版本不对”时。',
+ pitfall:'镜像个头会很大，要分层缓存优化；容器删了里面的数据就没了，要持久化的数据（数据库）要挂载到宿主机或用 volume。',
+ related:['t-build','t-dependency'],refs:[{n:'Docker 官网',u:'https://www.docker.com/'}]},
+];
+
+/* ===== 渲染逻辑 ===== */
+const $ = (s)=>document.querySelector(s);
+const $$ = (s)=>document.querySelectorAll(s);
+let currentModule = 'frontend';
+
+function moduleById(id){ return MODULES.find(m=>m.id===id) }
+
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+// 词条正文里允许 <code> 标签，其余转义；这里做白名单处理
+function sanitizeBody(html){
+  // 把 <code>...</code> 保留，其它尖括号转义
+  return html.replace(/&lt;code&gt;/g,'<code>').replace(/&lt;\/code&gt;/g,'</code>');
+}
+
+function renderTabs(){
+  $('#tabs').innerHTML = MODULES.map(m=>
+    `<button data-mod="${m.id}" class="${m.id===currentModule?'active':''}">${m.name}</button>`
+  ).join('');
+  $$('#tabs button').forEach(b=>b.addEventListener('click',()=>selectModule(b.dataset.mod)));
+}
+
+function renderSidebar(){
+  const m = moduleById(currentModule);
+  const terms = TERMS.filter(t=>t.module===currentModule);
+  // 按分类分组，保持数据顺序
+  const cats = [];
+  terms.forEach(t=>{
+    if(!cats.includes(t.cat)) cats.push(t.cat);
+  });
+  let html = `<h3>${m.name} · ${m.en}</h3>`;
+  cats.forEach(cat=>{
+    html += `<h3>${cat}</h3>`;
+    terms.filter(t=>t.cat===cat).forEach(t=>{
+      html += `<a href="#${t.id}" data-id="${t.id}">${t.cn} <span style="color:var(--text-dim);font-size:11px">${t.en}</span></a>`;
+    });
+  });
+  $('#sidebar').innerHTML = html;
+}
+
+function termById(id){ return TERMS.find(t=>t.id===id) }
+
+function renderContent(){
+  const m = moduleById(currentModule);
+  const terms = TERMS.filter(t=>t.module===currentModule);
+  const cats = [];
+  terms.forEach(t=>{ if(!cats.includes(t.cat)) cats.push(t.cat) });
+  let html = `
+    <div class="module-head">
+      <div class="kicker">${m.en.toUpperCase()} · 知识库</div>
+      <h1>${m.name}</h1>
+      <p>${m.desc}</p>
+    </div>`;
+  cats.forEach(cat=>{
+    const list = terms.filter(t=>t.cat===cat);
+    html += `<h2 class="cat-title">${cat} <span class="num">${list.length} 条</span></h2>`;
+    list.forEach(t=>{ html += renderTermCard(t) });
+  });
+  $('#content').innerHTML = html;
+  // 绑定相关词条跳转
+  $$('.related a').forEach(a=>a.addEventListener('click',(e)=>{
+    e.preventDefault(); jumpToTerm(a.dataset.to);
+  }));
+}
+
+function renderTermCard(t){
+  const refs = (t.refs||[]).map(r=>`<a href="${r.u}" target="_blank" rel="noopener">${r.n}</a>`).join('');
+  const related = (t.related||[]).map(id=>{
+    const r = termById(id); if(!r) return '';
+    return `<a href="#" data-to="${id}">${r.cn} <span style="opacity:.6">${r.en}</span></a>`;
+  }).join('');
+  return `
+  <article class="term" id="${t.id}">
+    <div class="term-head">
+      <span class="cn">${t.cn}</span>
+      <span class="en">${t.en}</span>
+      <span class="anchor" data-anchor="${t.id}">¶</span>
+    </div>
+    <div class="field explain">
+      <div class="label">人话解释</div>
+      <div class="body">${sanitizeBody(escapeHtml(t.explain))}</div>
+    </div>
+    <div class="field scenario">
+      <div class="label">调试时什么时候会遇到</div>
+      <div class="body">${sanitizeBody(escapeHtml(t.scenario))}</div>
+    </div>
+    <div class="field pitfall">
+      <div class="label">常见报错 / 误解</div>
+      <div class="body">${sanitizeBody(escapeHtml(t.pitfall))}</div>
+    </div>
+    ${related?`<div class="field"><div class="label">相关术语</div><div class="related">${related}</div></div>`:''}
+    ${refs?`<div class="field"><div class="label">权威参考</div><div class="refs">${refs}</div></div>`:''}
+  </article>`;
+}
+
+function selectModule(id){
+  currentModule = id;
+  renderTabs(); renderSidebar(); renderContent();
+  // 关移动端侧栏
+  $('#sidebar').classList.remove('open');
+  $('#overlay').classList.remove('show');
+  history.replaceState(null,'','#'+id);
+  // 默认滚到模块顶部
+  $('#content').scrollIntoView({behavior:'auto',block:'start'});
+  highlightActiveSidebar();
+}
+
+function jumpToTerm(id){
+  const t = termById(id);
+  if(!t) return;
+  if(t.module!==currentModule){
+    currentModule = t.module;
+    renderTabs(); renderSidebar(); renderContent();
+  }
+  // 等渲染后滚动
+  requestAnimationFrame(()=>{
+    const el = document.getElementById(id);
+    if(el){
+      el.scrollIntoView({behavior:'smooth',block:'start'});
+      // 短暂高亮
+      el.style.transition='box-shadow .6s';
+      const orig = el.style.boxShadow;
+      el.style.boxShadow='0 0 0 3px var(--accent)';
+      setTimeout(()=>{el.style.boxShadow=orig},900);
+    }
+    history.replaceState(null,'','#'+id);
+    highlightActiveSidebar();
+    $('#sidebar').classList.remove('open');
+    $('#overlay').classList.remove('show');
+  });
+}
+
+/* 当前可视词条高亮侧栏 */
+function highlightActiveSidebar(){
+  const cards = $$('.term');
+  if(!('IntersectionObserver' in window)){ return }
+  // 简化：监听滚动，取离顶最近的
+}
+function syncActiveOnScroll(){
+  const cards = [...$$('.term')];
+  if(!cards.length) return;
+  const offset = 90;
+  let active = null;
+  for(const c of cards){
+    const r = c.getBoundingClientRect();
+    if(r.top - offset <= 0) active = c;
+  }
+  if(!active) active = cards[0];
+  $$('#sidebar a').forEach(a=>a.classList.toggle('active', a.dataset.id===active.id));
+}
+
+/* ===== 搜索 ===== */
+function runSearch(q){
+  q = q.trim().toLowerCase();
+  const box = $('#searchResults');
+  if(!q){ box.classList.remove('show'); box.innerHTML=''; return; }
+  const hits = TERMS.filter(t=>{
+    return (t.cn+t.en+t.explain+t.scenario+t.pitfall+t.cat).toLowerCase().includes(q);
+  });
+  if(!hits.length){
+    box.innerHTML = `<div class="sr-empty">没找到 “${escapeHtml(q)}” 的词条。试试英文原名或换个词。</div>`;
+    box.classList.add('show'); return;
+  }
+  box.innerHTML = hits.map(t=>{
+    const mod = moduleById(t.module).name;
+    const snip = snippet(t.explain.replace(/<[^>]+>/g,''), q);
+    return `<div class="sr-item" data-id="${t.id}">
+      <span class="sr-mod">${mod}</span>
+      <span class="sr-cn">${highlight(t.cn,q)}</span>
+      <span class="sr-en">${highlight(t.en,q)}</span>
+      <div class="sr-snippet">${snip}</div>
+    </div>`;
+  }).join('');
+  box.classList.add('show');
+  $$('.sr-item').forEach(it=>it.addEventListener('click',()=>{
+    $('#search').value=''; $('#searchResults').classList.remove('show');
+    jumpToTerm(it.dataset.id);
+  }));
+}
+function snippet(text,q){
+  const i = text.toLowerCase().indexOf(q);
+  if(i<0) return escapeHtml(text.slice(0,60));
+  const start = Math.max(0,i-30);
+  const s = text.slice(start, start+90);
+  return (start>0?'…':'') + highlight(escapeHtml(s),q) + '…';
+}
+function highlight(text,q){
+  if(!q) return text;
+  const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return text.replace(re,'<mark>$1</mark>');
+}
+
+/* ===== 事件绑定 ===== */
+function bind(){
+  $('#search').addEventListener('input', e=>runSearch(e.target.value));
+  $('#search').addEventListener('focus', e=>{ if(e.target.value) runSearch(e.target.value) });
+  document.addEventListener('click',(e)=>{
+    if(!e.target.closest('.search-wrap') && !e.target.closest('#searchResults')){
+      $('#searchResults').classList.remove('show');
+    }
+  });
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='Escape'){ $('#search').value=''; $('#searchResults').classList.remove('show'); }
+    if((e.ctrlKey||e.metaKey) && e.key==='k'){ e.preventDefault(); $('#search').focus(); }
+  });
+
+  $('#content').addEventListener('click',(e)=>{
+    if(e.target.matches('.anchor')){ jumpToTerm(e.target.dataset.anchor) }
+  });
+
+  window.addEventListener('scroll', ()=>syncActiveOnScroll(), {passive:true});
+
+  // 侧栏锚点点击：原生 hash 跳转 + 高亮
+  $('#sidebar').addEventListener('click',(e)=>{
+    const a = e.target.closest('a[data-id]');
+    if(a){ e.preventDefault(); jumpToTerm(a.dataset.id) }
+  });
+
+  // 移动端侧栏开关
+  $('#sidebarToggle').addEventListener('click',()=>{
+    $('#sidebar').classList.toggle('open');
+    $('#overlay').classList.toggle('show');
+  });
+  $('#overlay').addEventListener('click',()=>{
+    $('#sidebar').classList.remove('open');
+    $('#overlay').classList.remove('show');
+  });
+
+  // 深浅色
+  const saved = localStorage.getItem('kb-theme');
+  if(saved) document.documentElement.setAttribute('data-theme', saved);
+  updateThemeIcon();
+  $('#themeToggle').addEventListener('click',()=>{
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('kb-theme', next);
+    updateThemeIcon();
+  });
+}
+function updateThemeIcon(){
+  $('#themeToggle').textContent = document.documentElement.getAttribute('data-theme')==='dark'?'☀️':'🌙';
+}
+
+/* ===== 初始化 ===== */
+function init(){
+  // 初始模块：用 hash 或默认 frontend
+  const h = location.hash.replace('#','');
+  let start = MODULES.some(m=>m.id===h) ? h : (TERMS.some(t=>t.id===h)? termById(h).module : 'frontend');
+  currentModule = start;
+  renderTabs(); renderSidebar(); renderContent();
+  bind();
+  // 如果 hash 指向某词条，跳过去
+  if(TERMS.some(t=>t.id===h)){
+    requestAnimationFrame(()=>jumpToTerm(h));
+  }
+  syncActiveOnScroll();
+}
+init();
+</script>
+</body>
+</html>
