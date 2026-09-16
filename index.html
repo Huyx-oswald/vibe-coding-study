@@ -69,8 +69,8 @@
   nav.tabs{display:flex;gap:4px;flex-wrap:wrap}
   nav.tabs button{
     border:1px solid transparent;background:transparent;color:var(--text-soft);
-    padding:7px 14px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:500;
-    transition:all .15s;
+    padding:7px 12px;border-radius:8px;font-size:13.5px;cursor:pointer;font-weight:500;
+    transition:all .15s;white-space:nowrap;
   }
   nav.tabs button:hover{background:var(--bg-soft);color:var(--text)}
   nav.tabs button.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
@@ -223,7 +223,7 @@
   <main class="content" id="content"></main>
 </div>
 
-<footer>内容基于 MDN / W3C / 全栈术语表整理 · 面向无 IT 基础的 vibecoding 与小调试场景 · 单文件离线可用</footer>
+<footer>内容基于 MDN / OWASP / PostgreSQL / 全栈路线图整理 · 7 模块 84 条词条 · 面向无 IT 基础的 vibecoding 与小调试场景 · 单文件离线可用</footer>
 
 <script>
 /* ===== 模块定义 ===== */
@@ -231,6 +231,9 @@ const MODULES = [
   { id:'frontend', name:'前端', en:'Frontend', desc:'用户在浏览器里直接看到、点到的那一层。HTML 搭结构、CSS 做样子、JavaScript 加交互。' },
   { id:'network',  name:'Web 网络', en:'Network', desc:'浏览器和服务器之间怎么说话、怎么传数据、怎么管登录态。调试“接口不通/跨域/缓存”都在这里。' },
   { id:'backend',  name:'后端', en:'Backend', desc:'跑在服务器上的那一层：处理业务逻辑、读写数据库、提供 API 给前端调用。' },
+  { id:'database', name:'数据库', en:'Database', desc:'数据怎么存、怎么查得快、怎么不丢、怎么扩展。表结构、索引、事务、缓存都在这里。' },
+  { id:'devops',   name:'DevOps & 部署', en:'DevOps', desc:'把代码放到服务器跑起来并持续运维：部署、容器、CI/CD、监控、域名、负载均衡。' },
+  { id:'security', name:'安全', en:'Security', desc:'让应用不被攻击者利用：防注入、防伪造、加密、密钥管理、OWASP 风险清单。' },
   { id:'tooling',  name:'工具链', en:'Tooling', desc:'围绕代码本身的工具：版本控制、构建打包、依赖管理、调试排错。' },
 ];
 
@@ -543,6 +546,137 @@ const TERMS = [
  scenario:'调“本地能跑线上不行”“环境装不上”“依赖版本不对”时。',
  pitfall:'镜像个头会很大，要分层缓存优化；容器删了里面的数据就没了，要持久化的数据（数据库）要挂载到宿主机或用 volume。',
  related:['t-build','t-dependency'],refs:[{n:'Docker 官网',u:'https://www.docker.com/'}]},
+
+/* ---------- 数据库 ---------- */
+{id:'d-index',module:'database',cat:'查询与结构',cn:'索引',en:'index',
+ explain:'给表的某些列建的一种“目录”，让查询不用整张表扫一遍而是像查字典一样快速定位。建索引能让查询快几十倍，但有代价。',
+ scenario:'调“查询很慢”“列表加载卡”“按某字段搜索要等几秒”时。',
+ pitfall:'索引不是越多越好——写数据时要同步更新索引会变慢、占空间；索引对 <code>LIKE %关键词</code>（前导通配）这类查询无效；忘了给常查的字段建索引是慢查询头号原因。',
+ related:['d-transaction','d-replication'],refs:[{n:'PostgreSQL 索引',u:'https://www.postgresql.org/docs/current/indexes.html'}]},
+{id:'d-transaction',module:'database',cat:'查询与结构',cn:'事务',en:'transaction',
+ explain:'把一组数据库操作打包，要么全部成功、要么全部回滚（像没发生过），保证数据不会做了一半。经典例子：转账扣钱+加钱必须一起成功或一起失败。',
+ scenario:'调“数据对不上账”“操作做到一半挂了留脏数据”“并发互相覆盖”时。',
+ pitfall:'事务不要包太久（如等网络请求），会长时间锁住数据拖慢整个系统；忘了用事务可能出现“扣了钱没加钱”的脏数据；隔离级别设错会读到别人未提交的数据。',
+ related:['d-index','d-conn-pool'],refs:[{n:'PostgreSQL 事务',u:'https://www.postgresql.org/docs/current/tutorial-transactions.html'}]},
+{id:'d-migration',module:'database',cat:'查询与结构',cn:'迁移',en:'migration',
+ explain:'用代码文件管理表结构的变更（加列、改类型、建表），每个变更是一个版本，可向前应用也可回滚。让多人协作时表结构变更可追踪、可重现。',
+ scenario:'调“本地能跑线上表结构不对”“加了字段忘了同步”“要回滚表结构变更”时。',
+ pitfall:'迁移要按顺序执行、不能改已上线的旧迁移文件（别人已经跑过），要新建一个迁移改回去；破坏性变更（删列、改类型）在生产要先备份，否则会丢数据。',
+ related:['d-index','d-backup'],refs:[{n:'Prisma 迁移',u:'https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate'}]},
+{id:'d-conn-pool',module:'database',cat:'运维与扩展',cn:'连接池',en:'connection pool',
+ explain:'后端预先建好一批数据库连接放“池子”里复用，每个请求从池里借一个用完还回去，避免每次都重新建连接（建连接很慢）。',
+ scenario:'调“请求一多就连不上数据库”“连接数爆了报错”“接口偶发性超时”时。',
+ pitfall:'池子大小要设合理，太小会排队等连接、太大数据库扛不住；连接泄漏（借了没还，如代码异常没释放）会让池子慢慢耗干导致服务假死。',
+ related:['d-transaction','d-replication'],refs:[{n:'PostgreSQL 连接池',u:'https://www.postgresql.org/docs/current/runtime-config-connection.html'}]},
+{id:'d-replication',module:'database',cat:'运维与扩展',cn:'主从复制',en:'replication',
+ explain:'把主库的数据实时同步到一个或多个从库。常见做法：写走主库、读走从库，分散压力；从库也能当备份和故障切换用。',
+ scenario:'调“读写分离怎么配”“主库挂了怎么办”“从库数据滞后”时。',
+ pitfall:'复制有延迟（异步复制时从库数据可能落后主库几毫秒到几秒），刚写完立刻从从库读可能读不到；主库挂了要切从库，但切之前没确认同步完可能丢最后几条数据。',
+ related:['d-conn-pool','d-backup'],refs:[{n:'PostgreSQL 复制',u:'https://www.postgresql.org/docs/current/high-availability.html'}]},
+{id:'d-redis',module:'database',cat:'运维与扩展',cn:'Redis 缓存',en:'Redis',
+ explain:'一种存内存里的键值数据库，读写极快（微秒级），常用来存热点数据、登录态、限流计数等需要快速访问的东西，减轻主数据库压力。',
+ scenario:'调“热点接口慢”“想加缓存”“验证码/登录态存哪”时。',
+ pitfall:'内存在重启会丢，重要数据别只存 Redis（要能从主库重建）；缓存要设过期+合理淘汰策略否则会无限增长撑爆内存；缓存和数据库不一致是经典难题（缓存击穿/穿透/雪崩）。',
+ related:['d-index','d-backup','n-cache'],refs:[{n:'Redis 官网',u:'https://redis.io/docs/'}]},
+{id:'d-backup',module:'database',cat:'运维与扩展',cn:'备份与恢复',en:'backup / restore',
+ explain:'定期把数据库复制一份存到别处（备份），出故障时能用它还原（恢复）。是数据安全的最后一道防线。',
+ scenario:'调“误删了数据”“数据库被勒索/损坏”“要恢复到某时间点”时。',
+ pitfall:'备份没演练过恢复=没有备份，真出事才发现恢复不了；只备份不验证、或备份和数据库在同一台机器会一起没；要定期演练恢复流程。',
+ related:['d-replication','d-migration'],refs:[{n:'PostgreSQL 备份',u:'https://www.postgresql.org/docs/current/backup.html'}]},
+{id:'d-normalization',module:'database',cat:'查询与结构',cn:'范式 / 反范式',en:'normalization',
+ explain:'设计表结构的一组规则：把数据拆成多张表、减少冗余和更新异常叫“范式”；为查询快故意加冗余叫“反范式”。设计要在少冗余和查询方便之间平衡。',
+ scenario:'调“表结构怎么设计”“同一信息存了好多遍改一处忘几处”“联表查太多慢”时。',
+ pitfall:'过度范式（拆太碎）查询要联一堆表很慢、SQL 难写；过度反范式冗余太多更新要改多处易不一致；实际常做到第三范式，热点查询再适度反范式。',
+ related:['d-index','d-migration'],refs:[{n:'数据库规范化',u:'https://en.wikipedia.org/wiki/Database_normalization'}]},
+
+/* ---------- DevOps & 部署 ---------- */
+{id:'v-deploy',module:'devops',cat:'部署与发布',cn:'部署',en:'deploy',
+ explain:'把代码放到服务器上、装好依赖、启动服务，让用户能访问到。可以手动传文件，更常用 CI/CD 自动化。',
+ scenario:'调“代码本地能跑线上不行”“部署后接口 404”“怎么回滚到上个版本”时。',
+ pitfall:'部署要可重复（同样操作再来一次结果一样）和可回滚（出问题能秒退到上一版）；部署时正在用的用户会受影响，要选低峰或用蓝绿/滚动发布减少中断。',
+ related:['v-cicd','v-nginx','v-deploy-docker'],refs:[{n:'MDN 部署',u:'https://developer.mozilla.org/zh-CN/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Deployment'}]},
+{id:'v-nginx',module:'devops',cat:'部署与发布',cn:'Nginx',en:'Nginx',
+ explain:'一个常用的 Web 服务器/反向代理软件。常用来接 80/443 端口、把请求转发给后端应用、处理 HTTPS 证书、托管静态文件。',
+ scenario:'调“域名访问不到应用”“HTTPS 证书怎么配”“静态文件 404”时。',
+ pitfall:'配置语法严格少个分号就全挂；<code>proxy_pass</code> 后的斜杠敏感（带不带/会改变路径拼接）；改完配置要 <code>nginx -t</code> 测试再 reload，否则可能整个站点 502。',
+ related:['v-deploy','v-ssl','v-load-balance'],refs:[{n:'Nginx 文档',u:'https://nginx.org/en/docs/'}]},
+{id:'v-cicd',module:'devops',cat:'部署与发布',cn:'CI/CD',en:'CI / CD',
+ explain:'CI 持续集成=每次提交自动跑构建+测试；CD 持续部署=通过测试后自动发布到服务器。让“提交→测试→上线”变成流水线，少人工、少出错。',
+ scenario:'调“合并到 main 后怎么自动上线”“测试没过不让合并”“一次部署炸了所有环境”时。',
+ pitfall:'CI 配置改坏会导致要么不跑要么误报；部署到生产前应有 staging 环境先验证；CD 失败要能自动回滚，否则线上挂了只能手动救。',
+ related:['v-deploy','t-build','v-deploy-docker'],refs:[{n:'GitHub Actions',u:'https://docs.github.com/zh/actions'}]},
+{id:'v-load-balance',module:'devops',cat:'部署与发布',cn:'负载均衡',en:'load balancing',
+ explain:'把进来的请求分发到多台服务器上，让没有一台被压垮、某台挂了流量自动转走。常见用 Nginx 或云厂商的 LB。',
+ scenario:'调“一台服务器扛不住”“某台挂了整个服务断”“会话跨机器丢”时。',
+ pitfall:'负载均衡后面多台机器的代码/配置要一致，否则出现“换台机器结果不一样”；登录态如果存本地内存，请求被分到别的机器会掉登录，要集中存（Redis）。',
+ related:['v-nginx','v-monitoring','d-replication'],refs:[{n:'Nginx 负载均衡',u:'https://nginx.org/en/docs/http/load_balancing.html'}]},
+{id:'v-monitoring',module:'devops',cat:'运维与监控',cn:'监控',en:'monitoring',
+ explain:'实时收集系统指标（CPU、内存、请求量、错误率、响应时间）画成图表，超阈值就告警，让你在用户报错前就发现系统出问题。',
+ scenario:'调“怎么知道线上挂没挂”“接口变慢了怎么发现”“半夜出问题没人知道”时。',
+ pitfall:'告警要分级别、避免“狼来了”（太多无效告警会被忽视真出事反而漏掉）；只监控不告警等于没监控；指标要选业务相关的不只看 CPU。',
+ related:['v-log-agg','v-load-balance'],refs:[{n:'Prometheus',u:'https://prometheus.io/docs/introduction/'}]},
+{id:'v-log-agg',module:'devops',cat:'运维与监控',cn:'日志聚合',en:'log aggregation',
+ explain:'把多台服务器的日志汇总到一处统一存储和搜索，出问题时不用挨个登服务器翻文件，而是统一查询。',
+ scenario:'调“报错不知是哪台机器”“日志散在多台难查”“历史日志查不到”时。',
+ pitfall:'日志聚合要按时间和量级保留，不然存不下；查询要能按 traceId/请求ID 串起一次请求的多条日志；别把敏感信息（密码/Token）打进聚合日志。',
+ related:['v-monitoring','t-log'],refs:[{n:'ELK 栈',u:'https://www.elastic.co/what-is/elk-stack'}]},
+{id:'v-dns',module:'devops',cat:'域名与网络',cn:'域名 / DNS',en:'domain / DNS',
+ explain:'DNS 是把人类好记的域名（example.com）翻译成机器要用的 IP 地址的全球目录服务。域名是你在域名商买的那个名字，要靠 DNS 解析到你的服务器。',
+ scenario:'调“域名打不开网站”“解析没生效”“换了服务器还指向旧 IP”时。',
+ pitfall:'DNS 有缓存和 TTL（生效时间），改了解析不是立即生效，本地、运营商各级都要等 TTL 到才更新；解析记录类型要选对（A 指 IPv4、CNAME 指向另一个域名）。',
+ related:['v-ssl','v-deploy'],refs:[{n:'DNS 工作原理',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/DNS'}]},
+{id:'v-ssl',module:'devops',cat:'域名与网络',cn:'SSL 证书 / HTTPS',en:'SSL / TLS certificate',
+ explain:'让网站走 HTTPS 加密的一张数字证书。装在服务器上，浏览器和服务器之间的数据被加密、不被窃听篡改。Let’s Encrypt 提供免费证书。',
+ scenario:'调“网站报不安全”“证书过期了”“HTTPS 装不上”时。',
+ pitfall:'证书有有效期（90天/1年），过期了浏览器会拦截用户；证书要和访问的域名匹配否则报错；HTTP 自动跳 HTTPS 要配 301 跳转，否则用户打 HTTP 仍然不加密。',
+ related:['v-dns','v-nginx','n-http'],refs:[{n:'Let\'s Encrypt',u:'https://letsencrypt.org/zh-cn/getting-started/'}]},
+{id:'v-deploy-docker',module:'devops',cat:'运维与监控',cn:'容器编排',en:'container orchestration',
+ explain:'管理一堆 Docker 容器的工具（如 Docker Compose 管多容器、Kubernetes 管大规模）。负责启动、重启、扩缩容、让容器挂了自动拉起。',
+ scenario:'调“多个服务怎么一起起”“容器挂了要手动拉”“上线要扩容”时。',
+ pitfall:'Kubernetes 学习曲线陡，小项目用 Docker Compose 够了别上 K8s；编排配置要版本化管理，否则“在我集群能跑在你那不行”同样会发生。',
+ related:['v-deploy','t-docker','v-cicd'],refs:[{n:'Kubernetes',u:'https://kubernetes.io/zh-cn/docs/concepts/overview/'}]},
+
+/* ---------- 安全 ---------- */
+{id:'s-xss',module:'security',cat:'Web 攻击',cn:'跨站脚本攻击',en:'XSS',
+ explain:'攻击者把恶意脚本注入到网页里，别的用户访问时脚本在他们浏览器里执行，能偷登录态、改页面、冒充用户操作。',
+ scenario:'调“用户输入直接显示在页面上”“评论里能塞代码”“Cookie 莫名被偷”时。',
+ pitfall:'防 XSS 核心是输出转义——把用户内容当纯文本不当 HTML，别用 <code>innerHTML</code> 拼用户数据；前端框架默认会转义，别绕过；Cookie 设 HttpOnly 防脚本偷。',
+ related:['s-csrf','s-owasp'],refs:[{n:'OWASP XSS',u:'https://owasp.org/www-community/attacks/xss/'}]},
+{id:'s-csrf',module:'security',cat:'Web 攻击',cn:'跨站请求伪造',en:'CSRF',
+ explain:'攻击者诱导已登录用户访问恶意页面，那个页面偷偷向你已登录的网站发请求（浏览器会自动带你的 Cookie），冒充你执行操作。',
+ scenario:'调“点了个链接账号就被改了”“表单能被别处伪造提交”“没登录的操作能被冒充”时。',
+ pitfall:'防 CSRF 用 anti-CSRF token 或检查 Referer/Origin；SameSite Cookie 属性能挡大部分 CSRF；GET 请求绝不能改数据（改数据的用 POST/PUT/DELETE）。',
+ related:['s-xss','n-cookie','s-owasp'],refs:[{n:'OWASP CSRF',u:'https://owasp.org/www-community/attacks/csrf'}]},
+{id:'s-sql-injection',module:'security',cat:'Web 攻击',cn:'SQL 注入',en:'SQL injection',
+ explain:'攻击者在输入框里塞 SQL 片段，如果你直接拼进 SQL 字符串，就被他改写成偷数据/删表/绕过登录的恶意查询。',
+ scenario:'调“登录框能输 \'or\'1\'=\'1 绕过”“搜索接口能拖库”“输入特殊字符报 SQL 错”时。',
+ pitfall:'防注入唯一可靠办法是参数化查询/预编译语句（或用 ORM），不是过滤或转义；过滤只挡已知模式，新姿势总能绕过；报错把 SQL 暴露给用户等于送情报。',
+ related:['s-xss','s-owasp','b-sql'],refs:[{n:'OWASP SQL 注入',u:'https://owasp.org/www-community/attacks/SQL_Injection'}]},
+{id:'s-password-hash',module:'security',cat:'加密与密钥',cn:'密码哈希',en:'password hashing',
+ explain:'用户密码不能明文存数据库，要用单向哈希（如 bcrypt/argon2）变成一串乱码存。哈希不可逆，即使数据库被偷也拿不到原密码。',
+ scenario:'调“密码怎么存才安全”“用户忘记密码能查回原密码吗”“数据库被脱库怎么办”时。',
+ pitfall:'别用 MD5/SHA1（太快、能暴力穷举），要用 bcrypt/argon2 等慢哈希且加盐；忘记密码只能重置不能“找回原密码”——能找回说明你存了明文或可逆加密，是错的。',
+ related:['s-secrets','s-owasp','b-auth'],refs:[{n:'OWASP 密码存储',u:'https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html'}]},
+{id:'s-https-ssl',module:'security',cat:'加密与密钥',cn:'HTTPS / TLS',en:'HTTPS / TLS',
+ explain:'HTTP 的加密版本。靠 TLS 协议给浏览器和服务器之间的数据加密，防窃听、防篡改、防冒充。网址的小锁和 https:// 就是它。',
+ scenario:'调“数据明文传输被抓包”“网站报不安全”“想加密接口”时。',
+ pitfall:'HTTPS 不加密服务器内部存储，只加密传输；没装证书强行 HTTPS 浏览器会拦截；混合内容（HTTPS 页面里调 HTTP 接口/资源）会被浏览器挡掉。',
+ related:['v-ssl','n-http','s-owasp'],refs:[{n:'MDN HTTPS',u:'https://developer.mozilla.org/zh-CN/docs/Glossary/HTTPS'}]},
+{id:'s-owasp',module:'security',cat:'安全总览',cn:'OWASP Top 10',en:'OWASP Top 10',
+ explain:'一个国际安全组织发布的“Web 应用十大最常见风险”清单，定期更新。是安全检查的事实标准，覆盖注入、认证失效、敏感数据暴露等。',
+ scenario:'调“项目要做安全评审”“不知道有哪些常见风险”“安全从哪查起”时。',
+ pitfall:'别只挂“我们用了 HTTPS”就以为安全，OWASP Top 10 里大部分（注入、CSRF、权限控制、日志）和加密无关；清单是起点不是终点，新风险不断出现。',
+ related:['s-xss','s-csrf','s-sql-injection'],refs:[{n:'OWASP Top 10',u:'https://owasp.org/Top10/'}]},
+{id:'s-secrets',module:'security',cat:'加密与密钥',cn:'密钥管理',en:'secrets management',
+ explain:'API 密钥、数据库密码、第三方 Token 这类“机密信息”不能硬编码进代码或提交进 git，要安全地存（环境变量/密钥管理服务）并控制访问。',
+ scenario:'调“密钥泄露了”“git 历史里有密码”“不同环境密钥不一样怎么管”时。',
+ pitfall:'密钥一旦提交进 git 历史就等于永久泄露（删文件删不掉历史），要立即吊销重置；前端代码里的密钥浏览器能看到，绝不能放“真正的服务器密钥”，要用后端代理。',
+ related:['s-password-hash','b-env','b-oauth'],refs:[{n:'OWASP 密钥管理',u:'https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html'}]},
+{id:'s-rate-limit',module:'security',cat:'安全总览',cn:'限流',en:'rate limiting',
+ explain:'限制某个来源在单位时间内能调接口的次数（如每分钟 60 次），防爬虫刷接口、防暴力撞密码、防恶意流量打垮服务。',
+ scenario:'调“接口被疯狂刷”“有人暴力撞登录密码”“爬虫拖慢服务”时。',
+ pitfall:'限流要够细（按用户/IP/API 分别限）否则误伤或被绕过；超限要返回 429 而不是 500；分布式下限流计数要集中存（Redis），不然每台机器各算各的等于没限。',
+ related:['s-csrf','v-load-balance','d-redis'],refs:[{n:'MDN 429',u:'https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status/429'}]},
 ];
 
 /* ===== 渲染逻辑 ===== */
